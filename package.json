@@ -1,0 +1,19 @@
+{
+  "name": "bw---feedback",
+  "version": "1.0.0",
+  "description": "Backend Web Project",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/DimTWH/SIP-feedback-notes.git"
+  },
+  "author": "Dima Balan",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/DimTWH/SIP-feedback-notes/issues"
+  },
+  "homepage": "https://github.com/DimTWH/SIP-feedback-notes#readme"
+}

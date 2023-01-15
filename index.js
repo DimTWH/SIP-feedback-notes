@@ -1,28 +1,18 @@
 const express = require('express');
 const { body, validationResult } = require('express-validator');
 const api = express();
-const mysql = require('mysql');
 const bodyParser = require('body-parser');
+const sql = require('./database')
 
-
-let sql = mysql.createPool({
-    host: process.env.DATABASE_HOST,
-    user: process.env.DATABASE_USER,
-    password: process.env.DATABASE_PASSWORD,
-    database: process.env.DATABASE,
-    port: process.env.DATABASE_POR,
-})
-
-
-sql.getConnection(function (err, connection) {
-    if (err) throw err; // not connected!
-    else console.log("Database connected successfully");
-})
+api.use(bodyParser.urlencoded({ extended: true }));
+api.use(express.urlencoded({ extended: true }));
+api.use(bodyParser.json({ type: 'application/json' }));
+api.use(express.json());
 
 // =============   Feedback Entity   =============
 
 // Create a new feedback
-router.post('/feedbacks/new', (req, res) => {
+api.post('/feedbacks/new', (req, res) => {
     const { rating, review } = req.body;
     sql.query(`INSERT INTO feedback (rating, review, created_at) VALUES (?, ?, ?)`, [rating, review, new Date()], (error, result) => {
         if (error) {
@@ -35,7 +25,7 @@ router.post('/feedbacks/new', (req, res) => {
 });
 
 // Get all feedbacks
-router.get('/feedbacks/all', (req, res) => {
+api.get('/feedbacks/all', (req, res) => {
     sql.query('SELECT * FROM feedback', (error, result) => {
         if (error) {
             return res.status(500).json({ error: error});
@@ -61,7 +51,7 @@ router.get('/feedbacks/all', (req, res) => {
 });
 
 // Get a single feedback
-router.get('/feedbacks', (req, res) => {
+api.get('/feedbacks', (req, res) => {
     const id = req.query.id;
     sql.query('SELECT * FROM feedback WHERE id = ?', [id], (error, result) => {
         if (error) {
@@ -83,7 +73,7 @@ router.get('/feedbacks', (req, res) => {
 });
 
 // Update a feedback
-router.put('/feedbacks/update', (req, res) => {
+api.put('/feedbacks/update', (req, res) => {
     const id = req.query.id;
     const { rating, review } = req.body;
     sql.query(`UPDATE feedback SET rating = ?, review = ? WHERE id = ?`, [rating, review, id], (error, result) => {
@@ -98,7 +88,7 @@ router.put('/feedbacks/update', (req, res) => {
 });
 
 // Delete a feedback
-router.delete('/feedbacks/delete', (req, res) => {
+api.delete('/feedbacks/delete', (req, res) => {
     const id = req.query.id;
     sql.query('DELETE FROM feedback WHERE id = ?', id, (error, result) => {
         if (error) {
@@ -109,3 +99,81 @@ router.delete('/feedbacks/delete', (req, res) => {
         }
     });
 });
+
+// =============   TASTING NOTE Entity   =============
+
+api.post('/tasting_notes/new', (req, res) => {
+    const { rating, note } = req.body;
+    sql.query('INSERT INTO tasting_note (rating, note, created_at) VALUES (?, ?, ?)', [rating, note, new Date()], (error, result) => {
+    if (error) {
+    return res.status(500).json({ error: error});
+    }
+    else {
+    res.status(200).json({ message: "Tasting note successfully Inserted" });
+    }
+    });
+    });
+    
+    // Get all tasting notes
+    api.get('/tasting_notes/all', (req, res) => {
+    sql.query('SELECT * FROM tasting_note', (error, result) => {
+    if (error) {
+    return res.status(500).json({ error: error});
+    }
+    else {
+    let notesArray = []
+    for (let i = 0; i < result.length; i++) {
+    const tn = result[i];
+    const tnObj = {
+    id: tn["id"],
+    rating: tn["rating"],
+    note: tn["note"],
+    created_at: tn["created_at"]
+    }
+    notesArray.push(tnObj)
+    }
+    const result = {
+    notesArray: notesArray
+    }
+    res.json(result);
+    }
+    });
+    });
+    
+    // Get a single tasting note
+    api.get('/tasting_notes', (req, res) => {
+    const id = req.query.id;
+    sql.query('SELECT * FROM tasting_note WHERE id = ?', [id], (error, result) => {
+    if (error) {
+    return res.status(500).json({ error: error});
+    }
+    else if (result.length === 0) {
+    return res.status(404).json({ error: "No tasting note exists with id: "+id});
+    }
+    else {
+    const result = {
+    id: result[0]["id"],
+    rating: result[0]["rating"],
+    note: result[0]["note"],
+    created_at: result[0]["created_at"]
+    }
+    res.json(result);
+    }
+    });
+    });
+    
+    // Update a tasting note
+    api.put('/tasting_notes/update', (req, res) => {
+    const id = req.query.id;
+    const { rating, note } = req.body;
+    sql.query('UPDATE tasting_note SET rating = ?, note = ? WHERE id = ?', [rating, note, id], (error, result) => {
+    if (error) {
+    return res.status(500).json({ error: error});
+    }
+    else {
+    res.status(200).json({ message: 'Tasting note successfully updated' });
+    }
+    
+
+    });
+    });
